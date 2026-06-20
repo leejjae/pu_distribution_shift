@@ -62,11 +62,11 @@ class CNNcifar(nn.Module):
         return self.head.in_features
     
     def forward_features(self, x: torch.Tensor) -> torch.Tensor:
-        x = self.stem(x)                 # (N, w1, 32, 32)
-        x = self.stage2(x)               # (N, w2, 16, 16)
-        x = self.stage3(x)               # (N, w3, 8, 8)
-        x = F.adaptive_avg_pool2d(x, 1)  # (N, w3, 1, 1)
-        x = torch.flatten(x, 1)          # (N, w3)
+        x = self.stem(x)                
+        x = self.stage2(x)              
+        x = self.stage3(x)               
+        x = F.adaptive_avg_pool2d(x, 1)  
+        x = torch.flatten(x, 1)          
         return x         
 
 

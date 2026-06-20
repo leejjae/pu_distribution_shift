@@ -14,7 +14,7 @@ from torch import optim
 from torch.utils.data import DataLoader, Subset, random_split
 from sklearn.metrics import accuracy_score, f1_score, roc_auc_score
 
-from lossFunc import bce_loss, nnpu_loss
+from lossFunc import nnpu_loss
 from model import build_model
 from dataset import DataManager, make_dataset
 from utils_fixmatch import make_labels_from_fixmatch
@@ -104,7 +104,7 @@ def evaluate(model, loader, gpu, train_prior):
     return (total_loss / max(1, total)), acc, f1, auc
 
 
-class ConfidenceBasedSelfTrainingLoss(nn.Module):
+class PseudoLoss(nn.Module):
     def __init__(self, tau=0.95, T=1.0):
         super().__init__()
         self.tau = tau
@@ -211,7 +211,7 @@ def main():
                            lr=args.lr, weight_decay=args.weight_decay)
     scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, args.epochs)
 
-    st_criterion = ConfidenceBasedSelfTrainingLoss(tau=args.threshold, T=args.T)
+    st_criterion = PseudoLoss(tau=args.threshold, T=args.T)
     best_val_loss = math.inf
     best_state = None
     no_improve = 0

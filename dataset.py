@@ -1,7 +1,6 @@
 import os
 import copy
 import random
-import scipy.io
 from typing import List
 
 import numpy as np
@@ -9,7 +8,7 @@ import torch
 
 
 from PIL import Image, ImageOps, ImageFilter
-from torch.utils.data import DataLoader, TensorDataset, Dataset, Subset, random_split
+from torch.utils.data import Dataset, Subset, random_split
 from torchvision import datasets, transforms
 from torchvision.transforms.functional import to_pil_image, InterpolationMode
 from sklearn.utils import shuffle
@@ -195,8 +194,6 @@ class BinaryCIFAR10v2(Dataset):
 
         if self.transform is not None:
             img = self.transform(img)
-        # else:
-        #     img = transforms.ToTensor()(img)
 
         return img, y_true, y 
          
@@ -320,8 +317,6 @@ class BinaryCinic(Dataset):
 
         if self.transform is not None:
             img = self.transform(img)
-        # else:
-        #     img = transforms.ToTensor()(img)
 
         return img, y_true, y 
 
@@ -457,32 +452,15 @@ class TwoViewDataset(Dataset):
     
 
 
-class TransformDataset(Dataset):
-    def __init__(self, base, x_transform):
-        self.base = base
-        self.x_transform = x_transform
-
-    def __len__(self):
-        return len(self.base)
-
-    def __getitem__(self, idx):
-        x, y_true, y = self.base[idx]
-        x = self.x_transform(x)
-        return x, y_true, y
-
-
 class TransformFixMatch(object):
     def __init__(self, mean, std, crop_size):
         self.weak = transforms.Compose([
-            # transforms.RandomHorizontalFlip(),
-            # transforms.Resize((crop_size, crop_size), antialias=True),
             transforms.RandomHorizontalFlip(),
             transforms.ToTensor(),
             transforms.Normalize(mean=mean, std=std)
         ])
         self.strong = transforms.Compose([
             transforms.RandomHorizontalFlip(),
-            # transforms.Resize((crop_size, crop_size), antialias=True),
             RandAugmentMC(n=2, m=10),
             transforms.ToTensor(),
             transforms.Normalize(mean=mean, std=std)
@@ -509,7 +487,6 @@ class TransformFixMatch(object):
         return w, s
 
     def __call__(self, x):
-
         return self.pair(x)
 
 
@@ -522,30 +499,11 @@ def make_dataset(dataset, role):
     base = ds.dataset if isinstance(ds, Subset) else ds
     if role == 'weak_train':
         base.transform = st_transform.weak_only()
-      
     elif role in ('weak_val', 'test'):
         base.transform = st_transform.eval_only()
-       
     elif role == 'tot_test':
-        base.transform = st_transform  #
-       
+        base.transform = st_transform
     else:
         raise ValueError(f"Unknown role: {role}")
     
     return ds
-
-
-
-# def dataset_to_tensors(ds, batch_size=1024, num_workers=2):
-#     loader = DataLoader(ds, batch_size=batch_size, shuffle=False,
-#                         drop_last=False, num_workers=num_workers, pin_memory=True)
-#     xs, yts, ys = [], [], []
-#     for x, y_true, y in loader:
-#         # x는 transforms.ToTensor() 이후 Tensor
-#         xs.append(x)
-#         yts.append(torch.as_tensor(y_true))
-#         ys.append(torch.as_tensor(y))
-#     X  = torch.cat(xs, dim=0)
-#     Yt = torch.cat(yts, dim=0).long()
-#     Y  = torch.cat(ys, dim=0).long()
-#     return TensorDataset(X, Yt, Y)

@@ -1,0 +1,13 @@
+# Data
+data/
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Checkpoints / test artifacts
+test_checkpoint/
+test_metric/
+
+# Editor
+.vscode/

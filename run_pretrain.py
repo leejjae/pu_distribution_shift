@@ -76,11 +76,9 @@ def main():
     train_dataset, test_dataset = data_manager.get_data()
 
     sort_idx = np.argsort(test_dataset.y_true)
-    te_4_tr = sort_idx[::2]   
-    te_4_te = sort_idx[1::2]
+    te_4_tr = sort_idx[::2]
     
-    te_4_tr_dataset = Subset(test_dataset, te_4_tr)   
-    # te_4_te_dataset = Subset(te_4_te_dataset, te_4_te)  
+    te_4_tr_dataset = Subset(test_dataset, te_4_tr)
     
     train_dataset = TwoViewDataset(train_dataset, TransformCL())
     te_4_tr_dataset = TwoViewDataset(te_4_tr_dataset, TransformCL())
@@ -124,15 +122,14 @@ def main():
         start_epoch = 0
 
     start_time = time.time()
-    scaler = GradScaler()
+    scaler = GradScaler('cuda')
     for epoch in range(start_epoch, args.epochs):
-        # sampler.set_epoch(epoch)
         for step, ((y1, y2), _, _) in enumerate(total_loader, start=epoch * len(total_loader)):
             y1 = y1.cuda(args.gpu_id, non_blocking=True)
             y2 = y2.cuda(args.gpu_id, non_blocking=True)
             adjust_learning_rate(args, optimizer, total_loader, step)
             optimizer.zero_grad()
-            with autocast(device_type="cuda"):
+            with autocast('cuda'):
                 loss = model.forward(y1, y2)
             scaler.scale(loss).backward()
             scaler.step(optimizer)
