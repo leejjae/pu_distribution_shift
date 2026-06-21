@@ -4,11 +4,6 @@ This document provides the dataset construction procedures and implementation
 details that are referenced in the main paper but omitted from the manuscript
 for length reasons.
 
-In-text citations use the author–year format and are listed in full in the
-[References](#references) section at the end of this document. They correspond to
-the bibliography of the main paper; please keep them consistent with the final
-`sn-bibliography.bib`.
-
 ---
 
 ## 1. Datasets
